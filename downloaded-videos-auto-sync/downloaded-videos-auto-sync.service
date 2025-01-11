@@ -1,0 +1,17 @@
+[Unit]
+Description=Auto Sync Downloaded Videos Directory
+After=network.target
+
+[Service]
+Type=simple
+ExecStart=/bin/bash /root/downloaded-videos-auto-sync/downloaded-videos-auto-sync.sh
+Restart=always
+RestartSec=5
+User=root
+Group=root
+StandardOutput=syslog
+StandardError=syslog
+SyslogIdentifier=downloaded-videos-auto-sync
+
+[Install]
+WantedBy=multi-user.target
