@@ -43,7 +43,7 @@ do
 
         if [ $RSYNC_EXIT_CODE -eq 0 ]; then
             # 如果同步成功，输出成功信息并跳出重试循环
-            echo "同步完成: ${NEW_FILE} -> ${DEST_DIR}"
+            echo "同步完成: ${NEW_FILE} -> ${TARGET_FILE}"
             break
         else
             # 如果同步失败，增加重试计数器并输出错误信息
