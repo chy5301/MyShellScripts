@@ -8,16 +8,35 @@ DEST_DIR="${DEST_DIR:-/volume2/@home/chy/Videos}"
 MAX_RETRIES="${MAX_RETRIES:-3}"
 INITIAL_RETRY_DELAY="${INITIAL_RETRY_DELAY:-1}"
 
+# 用户和组&权限
+TARGET_USER="${TARGET_USER:-chy}"
+TARGET_GROUP="${TARGET_GROUP:-admin}"
+TARGET_PERMISSIONS="${TARGET_PERMISSIONS:-770}"
+
 # 在源目录下使用 inotifywait 监控文件变化（只监控新增文件）
-inotifywait -m -r -e create -e moved_to --format "%w%f" "${SOURCE_DIR}" | while read NEW_FILE
+inotifywait -m -r -e create -e moved_to --format "%w%f" "${SOURCE_DIR}" | while read -r NEW_FILE
 do
+    # 获取相对路径
+    RELATIVE_PATH="${NEW_FILE#${SOURCE_DIR}/}"
+    
+    # 目标文件路径
+    TARGET_FILE="${DEST_DIR}/${RELATIVE_PATH}"
+
+    # 获取目标目录的父目录路径
+    TARGET_DIR=$(dirname "${TARGET_FILE}")
+
     # 初始化重试计数器
     RETRY_COUNT=0
 
     # 重试循环
     while [ $RETRY_COUNT -lt $MAX_RETRIES ]; do
+        # 确保目标目录存在，并设置正确的所有者、组和权限
+        install -d -m "${TARGET_PERMISSIONS}" -o "${TARGET_USER}" -g "${TARGET_GROUP}" "${TARGET_DIR}"
+        
         # 使用 rsync 同步新文件到目标目录
-        rsync -rlptv --ignore-existing --no-whole-file --exclude="*.part" --exclude="*.crdownload" --exclude="*.!qB" --exclude="*.ug-tmp" --chown=chy:admin --chmod=770 "${NEW_FILE}" "${DEST_DIR}"
+        rsync -rlptv --ignore-existing --no-whole-file \
+        --exclude="*.part" --exclude="*.crdownload" --exclude="*.!qB" --exclude="*.ug-tmp" \
+        --chown="${TARGET_USER}:${TARGET_GROUP}" --chmod="${TARGET_PERMISSIONS}" "${NEW_FILE}" "${DEST_DIR}"
         
         # 获取 rsync 的退出状态码
         RSYNC_EXIT_CODE=$?
