@@ -36,7 +36,7 @@ do
         # 使用 rsync 同步新文件到目标目录
         rsync -rlptv --ignore-existing --no-whole-file \
         --exclude="*.part" --exclude="*.crdownload" --exclude="*.!qB" --exclude="*.ug-tmp" \
-        --chown="${TARGET_USER}:${TARGET_GROUP}" --chmod="${TARGET_PERMISSIONS}" "${NEW_FILE}" "${DEST_DIR}"
+        --chown="${TARGET_USER}:${TARGET_GROUP}" --chmod="${TARGET_PERMISSIONS}" "${NEW_FILE}" "${TARGET_FILE}"
         
         # 获取 rsync 的退出状态码
         RSYNC_EXIT_CODE=$?
